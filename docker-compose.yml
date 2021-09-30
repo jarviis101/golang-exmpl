@@ -1,0 +1,18 @@
+version: "3.4"
+
+services:
+  app:
+    build:
+      dockerfile: docker/golang/Dockerfile
+      context: .
+      target: ${ENV}
+    ports:
+      - ${APP_PORT}
+    volumes:
+      - .:/opt/app/api
+    networks:
+      - backend
+
+networks:
+  backend:
+    external: true
