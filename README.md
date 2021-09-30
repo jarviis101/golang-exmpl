@@ -9,6 +9,8 @@ https://habr.com/ru/post/325468/
 
 https://github.com/golang-standards/project-layout
 
+https://github.com/aklinkert/go-gorm-repository/blob/master/repository.go
+
 ### Packages:
 https://github.com/go-gorm/gorm - DB ORM
 

@@ -1,4 +1,4 @@
-package app
+package config
 
 import (
 	"gopkg.in/yaml.v2"
@@ -9,6 +9,13 @@ type Config struct {
 	Server struct {
 		Host string `yaml:"host"`
 		Port string `yaml:"port"`
+	}
+	Database struct {
+		User     string `yaml:"user"`
+		Password string `yaml:"password"`
+		Host     string `yaml:"host"`
+		Port     string `yaml:"port"`
+		Name     string `yaml:"name"`
 	}
 }
 
