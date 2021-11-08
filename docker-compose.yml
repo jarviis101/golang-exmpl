@@ -1,17 +1,17 @@
 version: "3.4"
 
 services:
-  app:
-    build:
-      dockerfile: docker/golang/Dockerfile
-      context: .
-      target: ${ENV}
+  db:
+    image: mysql:8
+    restart: on-failure
+    container_name: ${ENV}_db
     ports:
-      - ${APP_PORT}
-    volumes:
-      - .:/opt/app/api
-    networks:
-      - backend
+      - "33061:3306"
+    environment:
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
 
 networks:
   backend:

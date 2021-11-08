@@ -2,6 +2,7 @@ package config
 
 import (
 	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"os"
 )
 
@@ -20,24 +21,16 @@ type Config struct {
 }
 
 func NewConfig(configPath string) (*Config, error) {
+	confContent, err := ioutil.ReadFile(configPath)
+	if err != nil {
+		panic(err)
+	}
+
+	confContent = []byte(os.ExpandEnv(string(confContent)))
 	config := &Config{}
 
-	file, err := os.Open(configPath)
-	if err != nil {
-		return nil, err
+	if err := yaml.Unmarshal(confContent, config); err != nil {
+		panic(err)
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			return
-		}
-	}(file)
-
-	d := yaml.NewDecoder(file)
-
-	if err := d.Decode(&config); err != nil {
-		return nil, err
-	}
-
 	return config, nil
 }
