@@ -1,17 +1,29 @@
 version: "3.4"
 
 services:
+  redis:
+    image: redis:6.2
+    container_name: ${ENV}_redis
+    restart: on-failure
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    networks:
+      - backend
+
   db:
     image: mysql:8
     restart: on-failure
     container_name: ${ENV}_db
     ports:
-      - "33061:3306"
+      - "3306:3306"
     environment:
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    networks:
+      - backend
 
 networks:
   backend:

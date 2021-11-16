@@ -1,14 +1,28 @@
 package auth
 
-import "github.com/dgrijalva/jwt-go"
+import (
+	"github.com/dgrijalva/jwt-go"
+	storage "prj/pkg/db/redis"
+	"strings"
+)
 
-func getToken(name string) (string, error) {
-	signKey := []byte("keymaker")
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"name": name,
+type Payload struct {
+	Phone string `json:"phone"`
+}
+
+func getToken(p *Payload) (string, error) {
+	token, _ := storage.GetTokenFromStorage(strings.Replace(p.Phone, "+", "ss:", 1))
+	if token != "" {
+		return token, nil
+	}
+
+	hash := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"payload": p,
 	})
-	tokenString, err := token.SignedString(signKey)
-	return tokenString, err
+	token, err := hash.SignedString([]byte("s3kp3t"))
+
+	storage.SetTokenToStorage(strings.Replace(p.Phone, "+", "ss:", 1), token, 450)
+	return token, err
 }
 
 func verifyToken(tokenString string) (jwt.Claims, error) {
