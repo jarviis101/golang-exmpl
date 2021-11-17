@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	storage "prj/pkg/db/redis"
 	"strings"
@@ -11,17 +12,20 @@ type Payload struct {
 }
 
 func getToken(p *Payload) (string, error) {
-	token, _ := storage.GetTokenFromStorage(strings.Replace(p.Phone, "+", "ss:", 1))
+	client := storage.CreateClient(1)
+	token, _ := client.Get(strings.Replace(p.Phone, "+", "ss:", 1))
 	if token != "" {
+		fmt.Println("Token exist")
 		return token, nil
 	}
 
+	fmt.Println("Token is not exist & create")
 	hash := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"payload": p,
 	})
 	token, err := hash.SignedString([]byte("s3kp3t"))
 
-	storage.SetTokenToStorage(strings.Replace(p.Phone, "+", "ss:", 1), token, 450)
+	client.Set(strings.Replace(p.Phone, "+", "ss:", 1), token, 450)
 	return token, err
 }
 

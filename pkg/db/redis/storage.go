@@ -9,18 +9,26 @@ import (
 
 var ctx = context.Background()
 
-var rdb = redis.NewClient(&redis.Options{
-	Addr:     "localhost:6379",
-	Password: "",
-	DB:       1,
-})
-
-func GetTokenFromStorage(key string) (string, error) {
-	return rdb.Get(ctx, key).Result()
+type Client struct {
+	*redis.Client
 }
 
-func SetTokenToStorage(key string, value string, ttl int) {
-	err := rdb.Set(ctx, key, value, time.Duration(time.Duration(ttl).Milliseconds())).Err()
+func CreateClient(db int) *Client {
+	return &Client{
+		Client: redis.NewClient(&redis.Options{
+			Addr:     "localhost:6379",
+			Password: "",
+			DB:       db,
+		}),
+	}
+}
+
+func (c *Client) Get(key string) (string, error) {
+	return c.Client.Get(ctx, key).Result()
+}
+
+func (c *Client) Set(key string, value string, ttl int) {
+	err := c.Client.Set(ctx, key, value, time.Duration(time.Duration(ttl).Milliseconds())).Err()
 	if err != nil {
 		fmt.Printf("redis error: %s", err.Error())
 	}
