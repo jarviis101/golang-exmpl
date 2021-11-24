@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"os"
 )
 
 const Path = "configs/config.yml"
@@ -31,8 +32,7 @@ func GetConfig() Config {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-
-	//content = []byte(os.ExpandEnv(string(content)))
+	content = []byte(os.ExpandEnv(string(content)))
 	config := Config{}
 	err = yaml.Unmarshal(content, &config)
 	if err != nil {
