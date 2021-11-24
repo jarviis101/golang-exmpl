@@ -8,12 +8,9 @@ import (
 	delivery "prj/internal/delivery/http"
 )
 
-func Run(configPath string) {
-	cfg, err := config.NewConfig(configPath)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	_, err = database.Connection(cfg)
+func Run() {
+	cfg := config.GetConfig()
+	_, err := database.CreateClient(cfg)
 	if err != nil {
 		fmt.Println(err.Error())
 	}

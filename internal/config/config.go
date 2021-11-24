@@ -1,36 +1,42 @@
 package config
 
 import (
+	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"os"
 )
 
-type Config struct {
-	Server struct {
-		Host string `yaml:"host"`
-		Port string `yaml:"port"`
-	}
-	Database struct {
-		User     string `yaml:"user"`
-		Password string `yaml:"password"`
-		Host     string `yaml:"host"`
-		Port     string `yaml:"port"`
-		Name     string `yaml:"name"`
-	}
+const Path = "configs/config.yml"
+
+type Server struct {
+	Host string `yaml:"host"`
+	Port string `yaml:"port"`
 }
 
-func NewConfig(configPath string) (*Config, error) {
-	confContent, err := ioutil.ReadFile(configPath)
+type Database struct {
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+	Name     string `yaml:"name"`
+}
+
+type Config struct {
+	Server
+	Database
+}
+
+func GetConfig() Config {
+	content, err := ioutil.ReadFile(Path)
 	if err != nil {
-		panic(err)
+		fmt.Println(err.Error())
 	}
 
-	confContent = []byte(os.ExpandEnv(string(confContent)))
-	config := &Config{}
-
-	if err := yaml.Unmarshal(confContent, config); err != nil {
-		panic(err)
+	//content = []byte(os.ExpandEnv(string(content)))
+	config := Config{}
+	err = yaml.Unmarshal(content, &config)
+	if err != nil {
+		fmt.Println(err.Error())
 	}
-	return config, nil
+	return config
 }
