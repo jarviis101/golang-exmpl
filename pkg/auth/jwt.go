@@ -3,39 +3,49 @@ package auth
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	storage "prj/pkg/db/redis"
-	"strings"
+	"time"
 )
+
+type JWTService interface {
+	Get(payload *Payload) (string, error)
+	Verify(token string) (*jwt.Token, error)
+}
 
 type Payload struct {
 	Phone string `json:"phone"`
 }
 
-func getToken(p *Payload) (string, error) {
-	client := storage.CreateClient(1)
-	token, _ := client.Get(strings.Replace(p.Phone, "+", "ss:", 1))
-	if token != "" {
-		fmt.Println("Token exist")
-		return token, nil
-	}
-
-	fmt.Println("Token is not exist & create")
-	hash := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"payload": p,
-	})
-	token, err := hash.SignedString([]byte("s3kp3t"))
-
-	client.Set(strings.Replace(p.Phone, "+", "ss:", 1), token, 450)
-	return token, err
+type Claims struct {
+	Phone string
+	jwt.StandardClaims
 }
 
-func verifyToken(tokenString string) (jwt.Claims, error) {
-	signKey := []byte("keymaker")
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return signKey, nil
-	})
-	if err != nil {
-		return nil, err
+type jwtService struct {
+	secretKey string
+}
+
+func JWTAuthService() JWTService {
+	return &jwtService{
+		secretKey: "s3kp3t",
 	}
-	return token.Claims, err
+}
+
+func (s *jwtService) Get(p *Payload) (string, error) {
+	claims := &Claims{
+		p.Phone,
+		jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(s.secretKey))
+}
+
+func (s *jwtService) Verify(token string) (*jwt.Token, error) {
+	return jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		if _, isValid := token.Method.(*jwt.SigningMethodRSA); !isValid {
+			return nil, fmt.Errorf("invalid token: %s", token.Header["alg"])
+		}
+		return []byte(s.secretKey), nil
+	})
 }

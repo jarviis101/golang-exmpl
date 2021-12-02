@@ -2,10 +2,12 @@ package app
 
 import (
 	"fmt"
-	"net/http"
+	"google.golang.org/grpc"
+	"net"
 	"prj/internal/config"
 	"prj/internal/database"
-	delivery "prj/internal/delivery/http"
+	"prj/internal/service/auth"
+	pb "prj/proto/auth"
 )
 
 func Run() {
@@ -14,10 +16,19 @@ func Run() {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	r := delivery.New()
-	http.Handle("/", r)
-	fmt.Println("Server is listen...")
-	if err = http.ListenAndServe(fmt.Sprintf("%s:%s", cfg.Server.Host, cfg.Server.Port), nil); err != nil {
-		return
+	lis, err := net.Listen("tcp", fmt.Sprintf(
+		"%s:%s",
+		cfg.Server.Host,
+		cfg.Server.Port,
+	),
+	)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	s := grpc.NewServer()
+	pb.RegisterAuthServiceServer(s, &auth.Service{})
+	fmt.Println("Server is listening...")
+	if err := s.Serve(lis); err != nil {
+		fmt.Println(err)
 	}
 }

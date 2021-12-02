@@ -1,28 +1,33 @@
 package auth
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
-type loginRepsonse struct {
+type loginResponse struct {
 	Token string `json:"token"`
 }
 
 func Login(c *gin.Context) {
 	var p Payload
+	jwtService := JWTAuthService()
 	err := c.BindJSON(&p)
 	if err != nil {
 		fmt.Printf("login error: %s", err.Error())
 	}
 
-	token, err := getToken(&p)
+	token, err := jwtService.Get(&p)
 	if err != nil {
 		fmt.Printf("token error: %s", err.Error())
 	}
 
-	err = json.NewEncoder(c.Writer).Encode(loginRepsonse{
+	c.JSON(http.StatusOK, &loginResponse{
 		Token: token,
 	})
+}
+
+func Logout(c *gin.Context) {
+
 }

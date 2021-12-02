@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "./";
+
+package auth;
+
+message Payload {
+  string phone = 1;
+}
+
+message Token {
+  string token = 1;
+}
+
+service AuthService {
+  rpc Get(Payload) returns(Token) {}
+}

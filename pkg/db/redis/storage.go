@@ -33,3 +33,10 @@ func (c *Client) Set(key string, value string, ttl int) {
 		fmt.Printf("redis error: %s", err.Error())
 	}
 }
+
+func (c *Client) Exist(key string) bool {
+	if c.Client.Exists(ctx, key).Val() == 0 {
+		return true
+	}
+	return false
+}
