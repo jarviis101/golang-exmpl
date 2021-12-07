@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option go_package = "./";
+
+package order;
+
+message OrderPayload {
+  string name = 1;
+  uint32 status = 2;
+  uint32 price = 3;
+}
+
+message OrderResponse {
+  string hash_id = 1;
+}
+
+message PaymentPayload {
+  uint32 type = 1;
+  int32 order_id = 2;
+}
+
+message PaymentResponse {
+  string status = 1;
+}
+
+service OrderService {
+  rpc CreateOrder(OrderPayload) returns (OrderResponse) {}
+  rpc PayOrder(PaymentPayload) returns (PaymentResponse) {}
+}
